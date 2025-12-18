@@ -1,0 +1,23 @@
+{
+  "name": "fuhv-generator",
+  "version": "1.0.0",
+  "description": "Generador de Formato Único de Hoja de Vida (FUHV) de Colombia",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js"
+  },
+  "keywords": [
+    "fuhv",
+    "colombia",
+    "hoja de vida",
+    "pdf"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "pdf-lib": "^1.17.1",
+    "puppeteer": "^24.33.0"
+  }
+}

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador FUHV - Formato Único de Hoja de Vida</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Generador de Formato Único de Hoja de Vida</h1>
+      <p class="subtitle">FUHV - Colombia (Formato Oficial)</p>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressBar"></div>
+      </div>
+      <div class="progress-steps">
+        <div class="step active" data-step="1">
+          <div class="step-number">1</div>
+          <div class="step-label">Datos Personales</div>
+        </div>
+        <div class="step" data-step="2">
+          <div class="step-number">2</div>
+          <div class="step-label">Ed. Básica</div>
+        </div>
+        <div class="step" data-step="3">
+          <div class="step-number">3</div>
+          <div class="step-label">Formación</div>
+        </div>
+        <div class="step" data-step="4">
+          <div class="step-number">4</div>
+          <div class="step-label">Idiomas</div>
+        </div>
+        <div class="step" data-step="5">
+          <div class="step-number">5</div>
+          <div class="step-label">Experiencia</div>
+        </div>
+        <div class="step" data-step="6">
+          <div class="step-number">6</div>
+          <div class="step-label">Tiempo Total</div>
+        </div>
+        <div class="step" data-step="7">
+          <div class="step-number">7</div>
+          <div class="step-label">Declaración</div>
+        </div>
+      </div>
+    </div>
+
+    <form id="fuhvForm">
+      <!-- PASO 1: DATOS PERSONALES -->
+      <div class="form-step active" data-step="1">
+        <h2>1. Datos Personales</h2>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="primerApellido">Primer Apellido *</label>
+            <input type="text" id="primerApellido" name="primerApellido" required>
+          </div>
+          <div class="form-group">
+            <label for="segundoApellido">Segundo Apellido (o de casada)</label>
+            <input type="text" id="segundoApellido" name="segundoApellido">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="primerNombre">Primer Nombre *</label>
+            <input type="text" id="primerNombre" name="primerNombre" required>
+          </div>
+          <div class="form-group">
+            <label for="segundoNombre">Segundo Nombre</label>
+            <input type="text" id="segundoNombre" name="segundoNombre">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="tipoDocumento">Tipo de Documento *</label>
+            <select id="tipoDocumento" name="tipoDocumento" required>
+              <option value="">Seleccione...</option>
+              <option value="CC">CC - Cédula de Ciudadanía</option>
+              <option value="CE">CE - Cédula de Extranjería</option>
+              <option value="PA">PAS - Pasaporte</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="numeroDocumento">Número de Documento *</label>
+            <input type="text" id="numeroDocumento" name="numeroDocumento" required>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="sexo">Sexo *</label>
+            <select id="sexo" name="sexo" required>
+              <option value="">Seleccione...</option>
+              <option value="F">F - Femenino</option>
+              <option value="M">M - Masculino</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="nacionalidad">Nacionalidad *</label>
+            <input type="text" id="nacionalidad" name="nacionalidad" value="Colombiana" required>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 20px; color: #764ba2;">Libreta Militar (Solo para hombres)</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="libretaMilitar">Clase de Libreta</label>
+            <select id="libretaMilitar" name="libretaMilitar">
+              <option value="">No aplica</option>
+              <option value="Primera">Primera Clase</option>
+              <option value="Segunda">Segunda Clase</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="numeroLibreta">Número de Libreta Militar</label>
+            <input type="text" id="numeroLibreta" name="numeroLibreta">
+          </div>
+        </div>
+
+        <h3 style="margin-top: 20px; color: #764ba2;">Fecha y Lugar de Nacimiento</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="fechaNacimiento">Fecha de Nacimiento (DD/MM/AAAA) *</label>
+            <input type="text" id="fechaNacimiento" name="fechaNacimiento" placeholder="25/03/1990" required>
+          </div>
+          <div class="form-group">
+            <label for="paisNacimiento">País de Nacimiento *</label>
+            <input type="text" id="paisNacimiento" name="paisNacimiento" value="Colombia" required>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="departamentoNacimiento">Departamento de Nacimiento *</label>
+            <input type="text" id="departamentoNacimiento" name="departamentoNacimiento" required>
+          </div>
+          <div class="form-group">
+            <label for="municipioNacimiento">Municipio de Nacimiento *</label>
+            <input type="text" id="municipioNacimiento" name="municipioNacimiento" required>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 20px; color: #764ba2;">Dirección de Correspondencia</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="paisResidencia">País de Residencia *</label>
+            <input type="text" id="paisResidencia" name="paisResidencia" value="Colombia" required>
+          </div>
+          <div class="form-group">
+            <label for="departamentoResidencia">Departamento de Residencia *</label>
+            <input type="text" id="departamentoResidencia" name="departamentoResidencia" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="municipioResidencia">Municipio de Residencia *</label>
+          <input type="text" id="municipioResidencia" name="municipioResidencia" required>
+        </div>
+
+        <div class="form-group">
+          <label for="direccion">Dirección de Residencia *</label>
+          <input type="text" id="direccion" name="direccion" placeholder="Ej: Calle 100 #15-20 Apto 501" required>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="telefono">Teléfono Fijo</label>
+            <input type="tel" id="telefono" name="telefono" placeholder="6011234567">
+          </div>
+          <div class="form-group">
+            <label for="email">Correo Electrónico *</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 2: EDUCACIÓN BÁSICA Y MEDIA -->
+      <div class="form-step" data-step="2">
+        <h2>2. Educación Básica y Media</h2>
+        <p class="step-description">
+          Marque el último grado aprobado. Los grados 1o. a 6o. de bachillerato equivalen a los grados 6o. a 11o. de educación básica secundaria y media.
+        </p>
+
+        <div class="form-group">
+          <label for="gradoAprobado">Último Grado Aprobado (1-11) *</label>
+          <select id="gradoAprobado" name="gradoAprobado" required>
+            <option value="">Seleccione...</option>
+            <option value="1">1o. - Primero</option>
+            <option value="2">2o. - Segundo</option>
+            <option value="3">3o. - Tercero</option>
+            <option value="4">4o. - Cuarto</option>
+            <option value="5">5o. - Quinto</option>
+            <option value="6">6o. - Sexto</option>
+            <option value="7">7o. - Séptimo</option>
+            <option value="8">8o. - Octavo</option>
+            <option value="9">9o. - Noveno</option>
+            <option value="10">10o. - Décimo</option>
+            <option value="11">11o. - Once</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="tituloBasico">Título Obtenido (si se graduó de bachillerato)</label>
+          <input type="text" id="tituloBasico" name="tituloBasico" placeholder="Ej: Bachiller Académico">
+        </div>
+
+        <div class="form-group">
+          <label for="fechaDeGrado">Fecha de Grado (MM/AAAA)</label>
+          <input type="text" id="fechaDeGrado" name="fechaDeGrado" placeholder="06/2015">
+          <small style="color: #666; font-size: 12px;">Solo ingrese si se graduó de bachillerato</small>
+        </div>
+      </div>
+
+      <!-- PASO 3: FORMACIÓN ACADÉMICA SUPERIOR -->
+      <div class="form-step" data-step="3">
+        <h2>3. Formación Académica Superior</h2>
+        <p class="step-description">
+          Agregue sus estudios de educación superior (técnico, tecnológico, universitario, especialización, maestría, doctorado).
+          <br><strong>Modalidades:</strong> TC (Técnica), TL (Tecnológica), TE (Tecnológica Especializada), UN (Universitaria), ES (Especialización), MG (Maestría), DOC (Doctorado)
+        </p>
+
+        <div id="formacionContainer"></div>
+
+        <button type="button" class="btn-add" onclick="addFormacion()">+ Agregar Formación Académica</button>
+      </div>
+
+      <!-- PASO 4: IDIOMAS -->
+      <div class="form-step" data-step="4">
+        <h2>4. Idiomas</h2>
+        <p class="step-description">
+          Especifique los idiomas diferentes al español que habla, lee y escribe.
+          <br><strong>Niveles:</strong> R (Regular), B (Bien), MB (Muy Bien)
+        </p>
+
+        <div id="idiomasContainer"></div>
+
+        <button type="button" class="btn-add" onclick="addIdioma()">+ Agregar Idioma</button>
+      </div>
+
+      <!-- PASO 5: EXPERIENCIA LABORAL -->
+      <div class="form-step" data-step="5">
+        <h2>5. Experiencia Laboral</h2>
+        <p class="step-description">
+          <strong>Importante:</strong> La primera sección es SOLO para su empleo actual. Si no está empleado actualmente, déjela vacía y agregue solo sus experiencias anteriores.
+        </p>
+
+        <div id="experienciaContainer"></div>
+
+        <button type="button" class="btn-add" onclick="addExperienciaAnterior()">+ Agregar Experiencia Anterior</button>
+      </div>
+
+      <!-- PASO 6: TIEMPO TOTAL DE EXPERIENCIA -->
+      <div class="form-step" data-step="6">
+        <h2>6. Tiempo Total de Experiencia</h2>
+        <p class="step-description">
+          Indique el tiempo total de su experiencia laboral en número de años y meses por tipo de ocupación.
+        </p>
+
+        <div class="section-card">
+          <h3 class="section-title">Servidor Público</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="tiempoServidorAnos">Años</label>
+              <input type="number" id="tiempoServidorAnos" name="tiempoServidorAnos" min="0" max="50" value="0">
+            </div>
+            <div class="form-group">
+              <label for="tiempoServidorMeses">Meses</label>
+              <input type="number" id="tiempoServidorMeses" name="tiempoServidorMeses" min="0" max="11" value="0">
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3 class="section-title">Empleado del Sector Privado</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="tiempoPrivadoAnos">Años</label>
+              <input type="number" id="tiempoPrivadoAnos" name="tiempoPrivadoAnos" min="0" max="50" value="0">
+            </div>
+            <div class="form-group">
+              <label for="tiempoPrivadoMeses">Meses</label>
+              <input type="number" id="tiempoPrivadoMeses" name="tiempoPrivadoMeses" min="0" max="11" value="0">
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3 class="section-title">Trabajador Independiente</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="tiempoIndependienteAnos">Años</label>
+              <input type="number" id="tiempoIndependienteAnos" name="tiempoIndependienteAnos" min="0" max="50" value="0">
+            </div>
+            <div class="form-group">
+              <label for="tiempoIndependienteMeses">Meses</label>
+              <input type="number" id="tiempoIndependienteMeses" name="tiempoIndependienteMeses" min="0" max="11" value="0">
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card" style="background: #e8f5e9;">
+          <h3 class="section-title" style="color: #2e7d32;">Total Tiempo de Experiencia</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="tiempoTotalAnos">Total Años *</label>
+              <input type="number" id="tiempoTotalAnos" name="tiempoTotalAnos" min="0" max="50" required>
+            </div>
+            <div class="form-group">
+              <label for="tiempoTotalMeses">Total Meses *</label>
+              <input type="number" id="tiempoTotalMeses" name="tiempoTotalMeses" min="0" max="11" required>
+            </div>
+          </div>
+          <p style="font-size: 12px; color: #666; margin-top: 10px;">
+            <strong>Nota:</strong> Sume los años y meses de las tres ocupaciones anteriores.
+          </p>
+        </div>
+      </div>
+
+      <!-- PASO 7: DECLARACIÓN -->
+      <div class="form-step" data-step="7">
+        <h2>7. Declaración Juramentada</h2>
+
+        <div class="declaration-box">
+          <p><strong>DECLARACIÓN JURAMENTADA</strong></p>
+          <p>
+            Manifiesto bajo la gravedad del juramento que <strong>SI / NO</strong> me encuentro dentro de las causales de inhabilidad e incompatibilidad
+            del orden constitucional o legal, para ejercer cargos empleos públicos o para celebrar contratos de prestación de servicios con la administración pública.
+          </p>
+          <p>
+            Para todos los efectos legales, certifico que los datos por mi anotados en el presente Formato Único de Hoja de Vida, son veraces
+            (Artículo 5o. de la Ley 190/95).
+          </p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="lugarDiligenciamiento">Lugar de Diligenciamiento *</label>
+            <input type="text" id="lugarDiligenciamiento" name="lugarDiligenciamiento" placeholder="Ej: Bogotá D.C." required>
+          </div>
+          <div class="form-group">
+            <label for="fechaDiligenciamiento">Fecha de Diligenciamiento *</label>
+            <input type="date" id="fechaDiligenciamiento" name="fechaDiligenciamiento" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="aceptaDeclaracion" name="aceptaDeclaracion" required>
+            <strong>Acepto la declaración juramentada y certifico que la información es veraz *</strong>
+          </label>
+        </div>
+
+        <div class="legal-notice">
+          <p>Esta aplicación facilita el diligenciamiento del Formato Único de Hoja de Vida conforme al modelo oficial establecido por Función Pública.</p>
+        </div>
+      </div>
+
+      <!-- Botones de Navegación -->
+      <div class="form-navigation">
+        <button type="button" class="btn btn-secondary" id="prevBtn" onclick="changeStep(-1)">Anterior</button>
+        <button type="button" class="btn btn-primary" id="nextBtn" onclick="changeStep(1)">Siguiente</button>
+        <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">Generar Hoja de Vida</button>
+      </div>
+    </form>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+      <div class="loader"></div>
+      <p>Generando su Hoja de Vida usando el formato oficial...</p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
