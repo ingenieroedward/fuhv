@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1e3a5f">
   <title>Generador FUHV - Formato Único de Hoja de Vida</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -19,6 +23,7 @@
       <div class="progress-bar">
         <div class="progress-fill" id="progressBar"></div>
       </div>
+      <p class="mobile-step-indicator" id="mobileStepIndicator">Paso 1 de 7 — Datos Personales</p>
       <div class="progress-steps">
         <div class="step active" data-step="1">
           <div class="step-number">1</div>
@@ -109,7 +114,7 @@
           </div>
         </div>
 
-        <h3 style="margin-top: 20px; color: #764ba2;">Libreta Militar (Solo para hombres)</h3>
+        <h3>Libreta Militar (Solo para hombres)</h3>
         <div class="form-grid">
           <div class="form-group">
             <label for="libretaMilitar">Clase de Libreta</label>
@@ -125,7 +130,7 @@
           </div>
         </div>
 
-        <h3 style="margin-top: 20px; color: #764ba2;">Fecha y Lugar de Nacimiento</h3>
+        <h3>Fecha y Lugar de Nacimiento</h3>
         <div class="form-grid">
           <div class="form-group">
             <label for="fechaNacimiento">Fecha de Nacimiento (DD/MM/AAAA) *</label>
@@ -148,7 +153,7 @@
           </div>
         </div>
 
-        <h3 style="margin-top: 20px; color: #764ba2;">Dirección de Correspondencia</h3>
+        <h3>Dirección de Correspondencia</h3>
         <div class="form-grid">
           <div class="form-group">
             <label for="paisResidencia">País de Residencia *</label>
@@ -306,8 +311,8 @@
           </div>
         </div>
 
-        <div class="section-card" style="background: #e8f5e9;">
-          <h3 class="section-title" style="color: #2e7d32;">Total Tiempo de Experiencia</h3>
+        <div class="section-card section-card--total">
+          <h3 class="section-title section-title--success">Total Tiempo de Experiencia</h3>
           <div class="form-grid">
             <div class="form-group">
               <label for="tiempoTotalAnos">Total Años *</label>
@@ -318,7 +323,7 @@
               <input type="number" id="tiempoTotalMeses" name="tiempoTotalMeses" min="0" max="11" required>
             </div>
           </div>
-          <p style="font-size: 12px; color: #666; margin-top: 10px;">
+          <p class="total-note">
             <strong>Nota:</strong> Sume los años y meses de las tres ocupaciones anteriores.
           </p>
         </div>
@@ -379,5 +384,30 @@
   </div>
 
   <script src="script.js"></script>
+  <script>
+    /* Actualiza el indicador de paso movil observando cambios en .step.active */
+    (function () {
+      var labels = ['Datos Personales', 'Ed. Básica', 'Formación', 'Idiomas', 'Experiencia', 'Tiempo Total', 'Declaración'];
+      var indicator = document.getElementById('mobileStepIndicator');
+      if (!indicator) return;
+
+      function updateIndicator() {
+        var active = document.querySelector('.step.active');
+        if (!active) return;
+        var step = parseInt(active.getAttribute('data-step'), 10);
+        if (!step) return;
+        indicator.textContent = 'Paso ' + step + ' de 7 \u2014 ' + (labels[step - 1] || '');
+      }
+
+      /* Observar cambios de clase en .progress-steps */
+      var stepsContainer = document.querySelector('.progress-steps');
+      if (stepsContainer) {
+        var observer = new MutationObserver(updateIndicator);
+        observer.observe(stepsContainer, { attributes: true, subtree: true, attributeFilter: ['class'] });
+      }
+
+      updateIndicator();
+    })();
+  </script>
 </body>
 </html>
