@@ -108,6 +108,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Auto-calcular tiempo total al cambiar campos del paso 6
+  ['tiempoServidorAnos','tiempoServidorMeses','tiempoPrivadoAnos',
+   'tiempoPrivadoMeses','tiempoIndependienteAnos','tiempoIndependienteMeses'
+  ].forEach(id => {
+    document.getElementById(id).addEventListener('input', calcularTiempoTotal);
+  });
+
   // Auto-guardar al cambiar cualquier campo
   document.getElementById('fuhvForm').addEventListener('input', scheduleDraftSave);
   document.getElementById('fuhvForm').addEventListener('change', scheduleDraftSave);
@@ -346,12 +353,12 @@ function addExperiencia() {
 
     <div class="form-grid">
       <div class="form-group">
-        <label>Fecha de Ingreso (DD/MM/AAAA)</label>
-        <input type="text" name="experiencia_ingreso_${experienciaCount}" placeholder="15/01/2020">
+        <label>Fecha de Ingreso</label>
+        <input type="month" name="experiencia_ingreso_${experienciaCount}">
       </div>
       <div class="form-group">
-        <label>Fecha de Retiro (DD/MM/AAAA)</label>
-        <input type="text" name="experiencia_retiro_${experienciaCount}" placeholder="Dejar vacío - es empleo actual">
+        <label>Fecha de Retiro <small>(vacío si es empleo actual)</small></label>
+        <input type="month" name="experiencia_retiro_${experienciaCount}">
       </div>
     </div>
   `;
@@ -434,12 +441,12 @@ function addExperienciaAnterior() {
 
     <div class="form-grid">
       <div class="form-group">
-        <label>Fecha de Ingreso (DD/MM/AAAA) *</label>
-        <input type="text" name="experiencia_ingreso_${experienciaCount}" placeholder="15/01/2020" required>
+        <label>Fecha de Ingreso *</label>
+        <input type="month" name="experiencia_ingreso_${experienciaCount}" required>
       </div>
       <div class="form-group">
-        <label>Fecha de Retiro (DD/MM/AAAA) *</label>
-        <input type="text" name="experiencia_retiro_${experienciaCount}" placeholder="31/12/2022" required>
+        <label>Fecha de Retiro *</label>
+        <input type="month" name="experiencia_retiro_${experienciaCount}" required>
       </div>
     </div>
   `;
@@ -503,12 +510,48 @@ function addIdioma() {
   container.appendChild(card);
 }
 
+// Auto-calcular tiempo total de experiencia (paso 6)
+function calcularTiempoTotal() {
+  const ids = [
+    'tiempoServidorAnos', 'tiempoServidorMeses',
+    'tiempoPrivadoAnos',  'tiempoPrivadoMeses',
+    'tiempoIndependienteAnos', 'tiempoIndependienteMeses'
+  ];
+
+  let totalMesesAcum = 0;
+  for (let i = 0; i < ids.length; i += 2) {
+    const anos  = parseInt(document.getElementById(ids[i]).value)     || 0;
+    const meses = parseInt(document.getElementById(ids[i + 1]).value) || 0;
+    totalMesesAcum += (anos * 12) + meses;
+  }
+
+  const anosTotal  = Math.floor(totalMesesAcum / 12);
+  const mesesTotal = totalMesesAcum % 12;
+
+  document.getElementById('tiempoTotalAnos').value  = anosTotal;
+  document.getElementById('tiempoTotalMeses').value = mesesTotal;
+}
+
 // Remover sección
 function removeSection(sectionId) {
   const section = document.getElementById(sectionId);
   if (section) {
     section.remove();
   }
+}
+
+// Convertir YYYY-MM-DD → DD/MM/AAAA (para fechaNacimiento)
+function dateToCol(val) {
+  if (!val) return '';
+  const [y, m, d] = val.split('-');
+  return d && m && y ? `${d}/${m}/${y}` : val;
+}
+
+// Convertir YYYY-MM → MM/AAAA (para fechaDeGrado y fechas de experiencia)
+function monthToCol(val) {
+  if (!val) return '';
+  const [y, m] = val.split('-');
+  return m && y ? `${m}/${y}` : val;
 }
 
 // Recolectar datos del formulario
@@ -529,7 +572,7 @@ function collectFormData() {
     paisNacimiento: formData.get('paisNacimiento'),
     departamentoNacimiento: formData.get('departamentoNacimiento'),
     municipioNacimiento: formData.get('municipioNacimiento'),
-    fechaNacimiento: formData.get('fechaNacimiento'),
+    fechaNacimiento: dateToCol(formData.get('fechaNacimiento')),
     paisResidencia: formData.get('paisResidencia'),
     departamentoResidencia: formData.get('departamentoResidencia'),
     municipioResidencia: formData.get('municipioResidencia'),
@@ -540,7 +583,7 @@ function collectFormData() {
     // Educación básica
     gradoAprobado: formData.get('gradoAprobado'),
     tituloBasico: formData.get('tituloBasico'),
-    fechaDeGrado: formData.get('fechaDeGrado'),
+    fechaDeGrado: monthToCol(formData.get('fechaDeGrado')),
 
     // Formación académica
     formacionAcademica: [],
@@ -621,8 +664,8 @@ function collectFormData() {
         cargo: formData.get(`experiencia_cargo_${i}`),
         dependencia: formData.get(`experiencia_dependencia_${i}`),
         direccion: formData.get(`experiencia_direccion_${i}`),
-        fechaIngreso: formData.get(`experiencia_ingreso_${i}`),
-        fechaRetiro: formData.get(`experiencia_retiro_${i}`)
+        fechaIngreso: monthToCol(formData.get(`experiencia_ingreso_${i}`)),
+        fechaRetiro: monthToCol(formData.get(`experiencia_retiro_${i}`))
       });
     }
   }

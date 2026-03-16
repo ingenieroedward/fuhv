@@ -133,8 +133,8 @@
         <h3>Fecha y Lugar de Nacimiento</h3>
         <div class="form-grid">
           <div class="form-group">
-            <label for="fechaNacimiento">Fecha de Nacimiento (DD/MM/AAAA) *</label>
-            <input type="text" id="fechaNacimiento" name="fechaNacimiento" placeholder="25/03/1990" required>
+            <label for="fechaNacimiento">Fecha de Nacimiento *</label>
+            <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
           </div>
           <div class="form-group">
             <label for="paisNacimiento">País de Nacimiento *</label>
@@ -218,8 +218,8 @@
         </div>
 
         <div class="form-group">
-          <label for="fechaDeGrado">Fecha de Grado (MM/AAAA)</label>
-          <input type="text" id="fechaDeGrado" name="fechaDeGrado" placeholder="06/2015">
+          <label for="fechaDeGrado">Fecha de Grado</label>
+          <input type="month" id="fechaDeGrado" name="fechaDeGrado">
           <small style="color: #666; font-size: 12px;">Solo ingrese si se graduó de bachillerato</small>
         </div>
       </div>
@@ -315,16 +315,16 @@
           <h3 class="section-title section-title--success">Total Tiempo de Experiencia</h3>
           <div class="form-grid">
             <div class="form-group">
-              <label for="tiempoTotalAnos">Total Años *</label>
-              <input type="number" id="tiempoTotalAnos" name="tiempoTotalAnos" min="0" max="50" required>
+              <label for="tiempoTotalAnos">Total Años</label>
+              <input type="number" id="tiempoTotalAnos" name="tiempoTotalAnos" min="0" max="50" readonly style="background:#f0f4f8;cursor:not-allowed;" value="0">
             </div>
             <div class="form-group">
-              <label for="tiempoTotalMeses">Total Meses *</label>
-              <input type="number" id="tiempoTotalMeses" name="tiempoTotalMeses" min="0" max="11" required>
+              <label for="tiempoTotalMeses">Total Meses</label>
+              <input type="number" id="tiempoTotalMeses" name="tiempoTotalMeses" min="0" max="11" readonly style="background:#f0f4f8;cursor:not-allowed;" value="0">
             </div>
           </div>
           <p class="total-note">
-            <strong>Nota:</strong> Sume los años y meses de las tres ocupaciones anteriores.
+            ✅ <strong>Se calcula automáticamente</strong> al ingresar los valores anteriores.
           </p>
         </div>
       </div>
