@@ -1,3 +1,7 @@
+// ── Variables globales de preview PDF ───────────────────────────────────────
+let _previewBlobUrl = null;
+let _previewFilename = 'FUHV.pdf';
+
 // Estado del formulario
 let currentStep = 1;
 const totalSteps = 7; // Actualizado a 7 pasos
@@ -81,7 +85,75 @@ function loadDraft() {
   }
 }
 
-// Inicialización
+// ── Validación en tiempo real ────────────────────────────────────────────────
+
+/**
+ * Valida un campo individual y muestra feedback visual.
+ * @param {HTMLElement} field
+ */
+function validateField(field) {
+  // Solo campos required; ignorar readonly y checkboxes (se validan aparte)
+  if (!field.hasAttribute('required') || field.type === 'checkbox' || field.readOnly) return;
+
+  const group = field.closest('.form-group');
+  if (!group) return;
+
+  // Obtener o crear el hint
+  let hint = group.querySelector('.field-hint');
+  if (!hint) {
+    hint = document.createElement('span');
+    hint.className = 'field-hint';
+    field.insertAdjacentElement('afterend', hint);
+  }
+
+  const isEmpty = field.value.trim() === '' || (field.tagName === 'SELECT' && field.value === '');
+
+  if (isEmpty) {
+    field.classList.remove('field-valid');
+    field.classList.add('field-invalid');
+    hint.textContent = '⚠ Campo obligatorio';
+    hint.className = 'field-hint invalid';
+  } else {
+    field.classList.remove('field-invalid');
+    field.classList.add('field-valid');
+    hint.textContent = '✓ Correcto';
+    hint.className = 'field-hint valid';
+  }
+}
+
+/**
+ * Limpia el estado de validación mientras el usuario escribe.
+ * @param {HTMLElement} field
+ */
+function clearFieldValidation(field) {
+  field.classList.remove('field-valid', 'field-invalid');
+  const group = field.closest('.form-group');
+  if (!group) return;
+  const hint = group.querySelector('.field-hint');
+  if (hint) hint.textContent = '';
+}
+
+/**
+ * Adjunta listeners de validación en tiempo real a todos los campos
+ * dentro de un contenedor (form completo o un card dinámico).
+ * @param {HTMLElement|Document} container
+ */
+function attachValidation(container) {
+  const fields = (container === document)
+    ? document.querySelectorAll('#fuhvForm input[required], #fuhvForm select[required]')
+    : container.querySelectorAll('input[required], select[required]');
+
+  fields.forEach(field => {
+    // Al salir del campo → validar
+    field.addEventListener('blur', () => validateField(field));
+    // Mientras escribe → limpiar estado de error (no el de éxito)
+    field.addEventListener('input', () => {
+      if (field.classList.contains('field-invalid')) clearFieldValidation(field);
+    });
+  });
+}
+
+// ── Inicialización ───────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   // Agregar una formación académica por defecto
   addFormacion();
@@ -121,6 +193,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Event listener para el submit
   document.getElementById('fuhvForm').addEventListener('submit', handleSubmit);
+
+  // Adjuntar validación en tiempo real a todos los campos estáticos
+  attachValidation(document);
+
+  // Cerrar modal con Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePreview();
+  });
 
   updateNavigation();
 });
@@ -276,6 +356,7 @@ function addFormacion() {
   `;
 
   container.appendChild(card);
+  attachValidation(card);
 }
 
 // Agregar trabajo actual (primera experiencia - campos opcionales)
@@ -364,6 +445,7 @@ function addExperiencia() {
   `;
 
   container.appendChild(card);
+  // No hay campos required en trabajo actual; nada que adjuntar
 }
 
 // Agregar experiencia laboral anterior (campos requeridos)
@@ -452,6 +534,7 @@ function addExperienciaAnterior() {
   `;
 
   container.appendChild(card);
+  attachValidation(card);
 }
 
 // Agregar idioma
@@ -508,6 +591,7 @@ function addIdioma() {
   `;
 
   container.appendChild(card);
+  attachValidation(card);
 }
 
 // Auto-calcular tiempo total de experiencia (paso 6)
@@ -673,6 +757,57 @@ function collectFormData() {
   return data;
 }
 
+// ── PDF Preview ──────────────────────────────────────────────────────────────
+
+/**
+ * Muestra el modal de vista previa con el blob del PDF.
+ * @param {Blob} blob
+ * @param {string} filename
+ */
+function showPreviewModal(blob, filename) {
+  // Liberar URL anterior si existe
+  if (_previewBlobUrl) URL.revokeObjectURL(_previewBlobUrl);
+
+  _previewBlobUrl = URL.createObjectURL(blob);
+  _previewFilename = filename;
+
+  const frame = document.getElementById('pdfPreviewFrame');
+  const modal = document.getElementById('pdfPreviewModal');
+
+  frame.src = _previewBlobUrl;
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+/** Descarga el PDF actualmente en preview. */
+function downloadCurrentPdf() {
+  if (!_previewBlobUrl) return;
+  const a = document.createElement('a');
+  a.href = _previewBlobUrl;
+  a.download = _previewFilename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // Limpiar borrador al descargar
+  clearDraft();
+}
+
+/** Cierra el modal de preview y libera recursos. */
+function closePreview() {
+  const modal = document.getElementById('pdfPreviewModal');
+  const frame = document.getElementById('pdfPreviewFrame');
+  modal.style.display = 'none';
+  document.body.style.overflow = '';
+  frame.src = '';
+  if (_previewBlobUrl) {
+    URL.revokeObjectURL(_previewBlobUrl);
+    _previewBlobUrl = null;
+  }
+}
+
+// ── Envío del formulario ─────────────────────────────────────────────────────
+
 // Manejar envío del formulario
 async function handleSubmit(e) {
   e.preventDefault();
@@ -683,6 +818,7 @@ async function handleSubmit(e) {
 
   // Recolectar datos
   const formData = collectFormData();
+  const filename = `FUHV_${formData.primerApellido}_${formData.primerNombre}.pdf`;
 
   // Mostrar loader
   document.getElementById('loadingOverlay').style.display = 'flex';
@@ -690,35 +826,19 @@ async function handleSubmit(e) {
   try {
     const response = await fetch('/generate-pdf', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
     });
 
-    if (!response.ok) {
-      throw new Error('Error al generar el PDF');
-    }
+    if (!response.ok) throw new Error('Error al generar el PDF');
 
-    // Descargar PDF
     const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `FUHV_${formData.primerApellido}_${formData.primerNombre}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
 
     // Ocultar loader
     document.getElementById('loadingOverlay').style.display = 'none';
 
-    // Limpiar borrador al generar con éxito
-    clearDraft();
-
-    // Mensaje de éxito
-    alert('¡Hoja de Vida generada exitosamente! El archivo se ha descargado.');
+    // Mostrar vista previa en lugar de descargar directamente
+    showPreviewModal(blob, filename);
 
   } catch (error) {
     console.error('Error:', error);

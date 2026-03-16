@@ -1110,6 +1110,95 @@ input[type='number'] {
   color: var(--neutral-700);
 }
 
+/* ── Real-time field validation ──────────────────────────── */
+.form-group input.field-valid,
+.form-group select.field-valid {
+  border-color: var(--success) !important;
+  background-color: var(--success-bg) !important;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.10);
+}
+
+.form-group input.field-invalid,
+.form-group select.field-invalid {
+  border-color: var(--error) !important;
+  background-color: var(--error-bg) !important;
+  animation: shake 0.45s ease-in-out;
+}
+
+.field-hint {
+  font-size: var(--text-xs);
+  margin-top: 3px;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 16px;
+}
+
+.field-hint.valid  { color: var(--success); }
+.field-hint.invalid { color: var(--error); }
+
+/* ── PDF Preview Modal ────────────────────────────────────── */
+.preview-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 14px;
+}
+
+.preview-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--primary-900);
+  padding: 14px 20px;
+  border-radius: var(--radius-lg);
+  color: white;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.preview-modal-header h3 {
+  font-size: var(--text-base);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: white;
+  border: none;
+  padding: 0;
+}
+
+.preview-modal-header h3::before { display: none; }
+
+.preview-modal-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.preview-iframe {
+  flex: 1;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: white;
+  min-height: 0;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .preview-modal { padding: 10px; gap: 10px; }
+  .preview-modal-header { flex-wrap: wrap; gap: 8px; }
+  .preview-modal-header h3 { font-size: var(--text-sm); }
+}
+
 /* ── Accesibilidad ────────────────────────────────────────── */
 :focus-visible {
   outline: 2px solid var(--primary-500);
