@@ -143,6 +143,11 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Servidor funcionando correctamente', timestamp: new Date().toISOString() });
 });
 
+// ── Fallback: servir index.html para cualquier ruta no reconocida ──────────────
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
 // ── Exportar app (para tests) ──────────────────────────────────────────────────
 module.exports = app;
 
