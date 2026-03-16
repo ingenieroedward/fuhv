@@ -5,7 +5,7 @@ const Joi = require('joi');
 const { fillFUHVPDF } = require('./pdf-filler');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 
 // ── Rate Limiting (deshabilitado en entorno de test) ───────────────────────────
 const isTest = process.env.NODE_ENV === 'test';
