@@ -62,6 +62,16 @@ async function scrollAndClick(p, selector) {
   await p.click(selector);
 }
 
+/** Setea un input type="date" o type="month" via JS (p.type() no funciona con date pickers) */
+async function setDateInput(p, selector, value) {
+  await p.evaluate((sel, val) => {
+    const el = document.querySelector(sel);
+    el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }, selector, value);
+}
+
 async function llenarPaso1(p) {
   await p.type('#primerApellido', 'Garcia');
   await p.type('#segundoApellido', 'Lopez');
@@ -70,7 +80,8 @@ async function llenarPaso1(p) {
   await p.select('#tipoDocumento', 'CC');
   await p.type('#numeroDocumento', '52345678');
   await p.select('#sexo', 'F');
-  await p.type('#fechaNacimiento', '15/08/1990');
+  // fechaNacimiento es type="date" → formato YYYY-MM-DD
+  await setDateInput(p, '#fechaNacimiento', '1990-08-15');
   await p.type('#departamentoNacimiento', 'Cundinamarca');
   await p.type('#municipioNacimiento', 'Bogota DC');
   await p.type('#departamentoResidencia', 'Cundinamarca');
@@ -113,20 +124,30 @@ async function navegarHastaPaso7(p) {
   await p.select('[name="idioma_escribe_1"]', 'B');
   await avanzarPaso(p); // → paso 5
 
-  // Paso 5 — Experiencia laboral (8 campos required en el bloque auto-añadido)
+  // Paso 5 — Experiencia laboral (campos required en el bloque auto-añadido)
   await p.type('[name="experiencia_empresa_1"]', 'Tech Solutions SAS');
   await p.select('[name="experiencia_tipo_1"]', 'Privada');
-  // experiencia_pais_1 ya tiene 'Colombia' por defecto
   await p.type('[name="experiencia_depto_1"]', 'Cundinamarca');
   await p.type('[name="experiencia_municipio_1"]', 'Bogota DC');
   await p.type('[name="experiencia_cargo_1"]', 'Desarrolladora');
-  await p.type('[name="experiencia_ingreso_1"]', '01/2020');
-  await p.type('[name="experiencia_retiro_1"]', '12/2023');
+  // fechas de experiencia son type="month" → formato YYYY-MM
+  await setDateInput(p, '[name="experiencia_ingreso_1"]', '2020-01');
+  await setDateInput(p, '[name="experiencia_retiro_1"]', '2023-12');
   await avanzarPaso(p); // → paso 6
 
-  // Paso 6 — Tiempo de experiencia (tiempoTotalAnos/Meses son required)
-  await p.$eval('#tiempoTotalAnos', el => { el.value = '3'; });
-  await p.$eval('#tiempoTotalMeses', el => { el.value = '0'; });
+  // Paso 6 — El total se calcula automáticamente al llenar los sectores
+  await p.evaluate(() => {
+    const campos = [
+      ['tiempoPrivadoAnos', '3'],
+      ['tiempoPrivadoMeses', '11'],
+    ];
+    campos.forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      el.value = val;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  });
+  await wait(300);
   await avanzarPaso(p); // → paso 7
 }
 
@@ -328,6 +349,109 @@ describe('🌐 Browser E2E — FUHV Wizard', () => {
       await wait(500);
       const loaderVisible = await page.$eval('#loadingOverlay', el => el.style.display !== 'none');
       expect(loaderVisible).toBe(false);
+    });
+  });
+
+  describe('📅 Date Pickers', () => {
+    test('fechaNacimiento acepta formato YYYY-MM-DD y lo convierte correctamente', async () => {
+      await setDateInput(page, '#fechaNacimiento', '1990-08-15');
+      const value = await page.$eval('#fechaNacimiento', el => el.value);
+      expect(value).toBe('1990-08-15');
+    });
+
+    test('fechaDeGrado acepta formato YYYY-MM (month picker)', async () => {
+      await setDateInput(page, '#fechaDeGrado', '2008-06');
+      const value = await page.$eval('#fechaDeGrado', el => el.value);
+      expect(value).toBe('2008-06');
+    });
+  });
+
+  describe('🧮 Auto-cálculo Tiempo Total Experiencia', () => {
+    async function irAPaso6(p) {
+      await llenarPaso1(p);
+      await avanzarPaso(p);
+      await p.select('#gradoAprobado', '11');
+      await avanzarPaso(p);
+      await llenarFormacion1(p);
+      await avanzarPaso(p);
+      await p.type('[name="idioma_nombre_1"]', 'Ingles');
+      await p.select('[name="idioma_habla_1"]', 'MB');
+      await p.select('[name="idioma_lee_1"]', 'MB');
+      await p.select('[name="idioma_escribe_1"]', 'B');
+      await avanzarPaso(p);
+      await p.type('[name="experiencia_empresa_1"]', 'Tech SAS');
+      await p.select('[name="experiencia_tipo_1"]', 'Privada');
+      await p.type('[name="experiencia_depto_1"]', 'Cundinamarca');
+      await p.type('[name="experiencia_municipio_1"]', 'Bogota DC');
+      await p.type('[name="experiencia_cargo_1"]', 'Dev');
+      await setDateInput(p, '[name="experiencia_ingreso_1"]', '2020-01');
+      await setDateInput(p, '[name="experiencia_retiro_1"]', '2023-12');
+      await avanzarPaso(p); // → paso 6
+    }
+
+    test('los campos de total son readonly', async () => {
+      await irAPaso6(page);
+      const readonly = await page.$eval('#tiempoTotalAnos', el => el.readOnly);
+      expect(readonly).toBe(true);
+    });
+
+    test('calcula correctamente 2 años + 6 meses de sector privado', async () => {
+      await irAPaso6(page);
+      await page.evaluate(() => {
+        ['tiempoPrivadoAnos', '2'].concat([]).forEach(() => {});
+        const a = document.getElementById('tiempoPrivadoAnos');
+        a.value = '2';
+        a.dispatchEvent(new Event('input', { bubbles: true }));
+        const m = document.getElementById('tiempoPrivadoMeses');
+        m.value = '6';
+        m.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      await wait(300);
+      const anos  = await page.$eval('#tiempoTotalAnos',  el => el.value);
+      const meses = await page.$eval('#tiempoTotalMeses', el => el.value);
+      expect(anos).toBe('2');
+      expect(meses).toBe('6');
+    });
+
+    test('suma correctamente múltiples sectores con conversión de meses a años', async () => {
+      await irAPaso6(page);
+      await page.evaluate(() => {
+        // 1 año 8 meses servidor + 0 años 7 meses privado = 2 años 3 meses total
+        const vals = {
+          tiempoServidorAnos: '1', tiempoServidorMeses: '8',
+          tiempoPrivadoAnos: '0', tiempoPrivadoMeses: '7',
+          tiempoIndependienteAnos: '0', tiempoIndependienteMeses: '0'
+        };
+        Object.entries(vals).forEach(([id, val]) => {
+          const el = document.getElementById(id);
+          el.value = val;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      });
+      await wait(300);
+      const anos  = await page.$eval('#tiempoTotalAnos',  el => el.value);
+      const meses = await page.$eval('#tiempoTotalMeses', el => el.value);
+      // 1*12+8 + 0*12+7 = 20+7 = 27 meses = 2 años 3 meses
+      expect(anos).toBe('2');
+      expect(meses).toBe('3');
+    });
+
+    test('el total se resetea a 0 cuando todos los campos son 0', async () => {
+      await irAPaso6(page);
+      await page.evaluate(() => {
+        ['tiempoServidorAnos','tiempoServidorMeses','tiempoPrivadoAnos',
+         'tiempoPrivadoMeses','tiempoIndependienteAnos','tiempoIndependienteMeses'
+        ].forEach(id => {
+          const el = document.getElementById(id);
+          el.value = '0';
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      });
+      await wait(300);
+      const anos  = await page.$eval('#tiempoTotalAnos',  el => el.value);
+      const meses = await page.$eval('#tiempoTotalMeses', el => el.value);
+      expect(anos).toBe('0');
+      expect(meses).toBe('0');
     });
   });
 
