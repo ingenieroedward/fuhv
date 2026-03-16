@@ -7,6 +7,80 @@ let formacionCount = 0;
 let experienciaCount = 0;
 let idiomaCount = 0;
 
+// ── Borrador en LocalStorage ────────────────────────────────────────────────────
+const DRAFT_KEY = 'fuhv_borrador';
+const DRAFT_DEBOUNCE_MS = 1500;
+let draftTimer = null;
+
+function saveDraft() {
+  try {
+    const form = document.getElementById('fuhvForm');
+    if (!form) return;
+    const data = new FormData(form);
+    const draft = {};
+    for (const [key, value] of data.entries()) draft[key] = value;
+    draft.__formacionCount = formacionCount;
+    draft.__experienciaCount = experienciaCount;
+    draft.__idiomaCount = idiomaCount;
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    showDraftStatus('💾 Borrador guardado');
+  } catch (e) {
+    console.warn('No se pudo guardar el borrador:', e);
+  }
+}
+
+function scheduleDraftSave() {
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(saveDraft, DRAFT_DEBOUNCE_MS);
+}
+
+function clearDraft() {
+  localStorage.removeItem(DRAFT_KEY);
+  showDraftStatus('🗑️ Borrador eliminado');
+}
+
+function showDraftStatus(msg) {
+  let el = document.getElementById('draftStatus');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 2500);
+}
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return false;
+
+    const draft = JSON.parse(raw);
+    const savedFormacion = parseInt(draft.__formacionCount) || 0;
+    const savedExperiencia = parseInt(draft.__experienciaCount) || 0;
+    const savedIdioma = parseInt(draft.__idiomaCount) || 0;
+
+    // Restaurar secciones dinámicas adicionales
+    for (let i = 1; i < savedFormacion; i++) addFormacion();
+    for (let i = 1; i < savedExperiencia; i++) addExperiencia();
+    for (let i = 1; i < savedIdioma; i++) addIdioma();
+
+    // Restaurar valores de campos
+    const form = document.getElementById('fuhvForm');
+    for (const [key, value] of Object.entries(draft)) {
+      if (key.startsWith('__')) continue;
+      const el = form.querySelector(`[name="${key}"]`);
+      if (!el) continue;
+      if (el.type === 'checkbox') {
+        el.checked = value === 'on' || value === true;
+      } else {
+        el.value = value;
+      }
+    }
+    return true;
+  } catch (e) {
+    console.warn('No se pudo restaurar el borrador:', e);
+    return false;
+  }
+}
+
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
   // Agregar una formación académica por defecto
@@ -21,6 +95,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // Establecer fecha de diligenciamiento como hoy
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('fechaDiligenciamiento').value = today;
+
+  // Restaurar borrador si existe
+  const tieneBorrador = localStorage.getItem(DRAFT_KEY);
+  if (tieneBorrador) {
+    const restaurar = confirm('📋 Se encontró un borrador guardado. ¿Deseas restaurarlo?');
+    if (restaurar) {
+      loadDraft();
+      showDraftStatus('✅ Borrador restaurado');
+    } else {
+      clearDraft();
+    }
+  }
+
+  // Auto-guardar al cambiar cualquier campo
+  document.getElementById('fuhvForm').addEventListener('input', scheduleDraftSave);
+  document.getElementById('fuhvForm').addEventListener('change', scheduleDraftSave);
 
   // Event listener para el submit
   document.getElementById('fuhvForm').addEventListener('submit', handleSubmit);
@@ -580,6 +670,9 @@ async function handleSubmit(e) {
 
     // Ocultar loader
     document.getElementById('loadingOverlay').style.display = 'none';
+
+    // Limpiar borrador al generar con éxito
+    clearDraft();
 
     // Mensaje de éxito
     alert('¡Hoja de Vida generada exitosamente! El archivo se ha descargado.');

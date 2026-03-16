@@ -5,7 +5,14 @@
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
-    "dev": "node server/index.js"
+    "dev": "node server/index.js",
+    "test": "NODE_ENV=test jest tests/ --verbose --runInBand",
+    "test:unit": "NODE_ENV=test jest tests/validation.test.js --verbose",
+    "test:api": "NODE_ENV=test jest tests/e2e/api.e2e.test.js --verbose",
+    "test:browser": "NODE_ENV=test jest tests/e2e/browser.e2e.test.js --verbose"
+  },
+  "jest": {
+    "testTimeout": 60000
   },
   "keywords": [
     "fuhv",
@@ -17,7 +24,13 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
+    "express-rate-limit": "^8.3.1",
+    "joi": "^18.0.2",
     "pdf-lib": "^1.17.1",
     "puppeteer": "^24.33.0"
+  },
+  "devDependencies": {
+    "jest": "^30.3.0",
+    "supertest": "^7.2.2"
   }
 }
